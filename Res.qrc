@@ -1,0 +1,40 @@
+<RCC>
+    <qresource prefix="/style">
+        <file>qss/style.qss</file>
+    </qresource>
+    <qresource prefix="/images">
+        <file>images/debug.log</file>
+        <file>images/el8.png</file>
+        <file>images/max.ico</file>
+        <file>images/min.ico</file>
+        <file>images/ng.ico</file>
+        <file>images/ok.ico</file>
+        <file>images/opt.ico</file>
+        <file>images/setting.ico</file>
+        <file>images/start.ico</file>
+        <file>images/stop.ico</file>
+        <file>images/down.png</file>
+        <file>images/up.png</file>
+        <file>images/down16.png</file>
+        <file>images/up16.png</file>
+        <file>images/down24.png</file>
+        <file>images/down32.png</file>
+        <file>images/down16.ico</file>
+        <file>images/down_1.png</file>
+        <file>images/down.ico</file>
+        <file>images/query.ico</file>
+        <file>images/sorting.png</file>
+        <file>images/up.ico</file>
+        <file>images/solar.png</file>
+        <file>images/list.png</file>
+        <file>images/aiPort.ico</file>
+        <file>images/imgSet.ico</file>
+        <file>images/device.ico</file>
+        <file>images/product.ico</file>
+        <file>images/item.ico</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>sound/Audio.wav</file>
+        <file>version/version.rc</file>
+    </qresource>
+</RCC>
