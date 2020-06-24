@@ -49,8 +49,9 @@ protected slots:
 
 signals:
     void signal_waitTimeout();
-    void sig_aiResult(bool isOk, QString url, QString level, QString imgPath, int hanlde, QImage img, QStringList defList, QStringList posList
-                      , QStringList clsList, AiDataMap areaMap, AiDataMap lenMap, QMap<QString,QStringList>);
+    void sig_aiResult(bool isOk, bool bTimeout, QString url, QString level, QString imgPath, int hanlde, QImage img,
+                      QStringList defList, QStringList posList, QStringList clsList, AiDataMap areaMap, AiDataMap lenMap,
+                      QMap<QString,QStringList>);
     void sig_aiDisConnect(QString, int);
     void sig_aiInfo(QString);
 

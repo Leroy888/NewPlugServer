@@ -40,7 +40,7 @@ public:
 private:
     void readSettings(QString fileName);
     void initTreeWidget(QString equip);
-    void updateTableWidget();
+    void updateTableWidget(const QMap<QString,QStringList> &tmpStdMap);
     void saveCurrentStd(QString sort);
     void initDgLevels(const QStringList &dgList);
     void updateSortMap(const QString &node, const QString &node1);
@@ -87,6 +87,10 @@ private slots:
 
     void on_btnSave_clicked();
 
+    void on_btnLoad_clicked();
+
+    void on_btnExport_clicked();
+
 signals:
     void sig_applySorting(QStringList, QStringList, QStringList, QString, SortMap);
     void sig_applySorting(QString, QStringList, QString, SortMap);
@@ -130,6 +134,7 @@ private:
     int m_curRow;
     QMap<QString, QString> m_equipProductMap;
 
+    bool loadTemp(const QString &fileName);
 };
 
 #endif // SORTINGDIALOG_H

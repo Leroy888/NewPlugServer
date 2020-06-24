@@ -19,6 +19,7 @@ public:
 
     QStringList getPosList() const;
     QStringList getDefList() const;
+    QString getLevel() const;
 
     bool getIsOk() const;
 private:
@@ -33,6 +34,10 @@ private slots:
 
     void slot_onDefBtnClicked(bool value, int index, QString text);
     void slot_onPosBtnClicked(QString text);
+
+    void on_btnQA_clicked();
+
+    void on_btnQB_clicked();
 
 private:
     Ui::NgDialog *ui;
@@ -50,6 +55,7 @@ private:
     int m_posIndex;
     bool m_isTurn;
     bool m_isOk;
+    QString m_level;
 };
 
 #endif // NGDIALOG_H

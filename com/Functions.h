@@ -29,6 +29,14 @@ struct ClientParam
     QString url;
     QString info;
     QString line;
+    QString barCode;
+};
+
+struct AiStatus
+{
+    bool isBusy = false;
+    bool bTimeout = false;
+    int timeoutNum = 0;
 };
 
 enum IOStyle{

@@ -11,6 +11,7 @@ NgDialog::NgDialog(const bool isTurn, const int horPic, const int verPic, const 
     ui->setupUi(this);
     this->setWindowTitle(QStringLiteral("缺陷选择"));
     m_isOk = false;
+    m_level = "";
     initUi();
 }
 
@@ -32,6 +33,11 @@ QStringList NgDialog::getPosList() const
 QStringList NgDialog::getDefList() const
 {
     return m_mesDefList;
+}
+
+QString NgDialog::getLevel() const
+{
+    return m_level;
 }
 
 void NgDialog::initUi()
@@ -178,4 +184,18 @@ void NgDialog::slot_onPosBtnClicked(QString text)
 
     m_posList.append(text);
     m_mesDefList.append(strDef);
+}
+
+void NgDialog::on_btnQA_clicked()
+{
+    m_level = "QA";
+    ui->btnQA->setEnabled(false);
+    ui->btnQB->setEnabled(true);
+}
+
+void NgDialog::on_btnQB_clicked()
+{
+    m_level = "QB";
+    ui->btnQB->setEnabled(false);
+    ui->btnQA->setEnabled(true);
 }

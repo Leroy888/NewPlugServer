@@ -32,6 +32,8 @@
         <file>images/device.ico</file>
         <file>images/product.ico</file>
         <file>images/item.ico</file>
+        <file>images/update.png</file>
+        <file>images/update.ico</file>
     </qresource>
     <qresource prefix="/">
         <file>sound/Audio.wav</file>

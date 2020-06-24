@@ -207,7 +207,7 @@ void AiThread::run()
         qDebug()<<m_handle<<info;
         QString imgName = m_imgPath.split("/").last();
         emit sig_aiDisConnect(m_strUrl, m_handle);
-        emit sig_aiResult(false, m_strUrl, "", m_imgPath, m_handle, m_img, m_defectList, m_posList, m_clsList, m_areaMap, m_lenMap, m_posMap);
+        emit sig_aiResult(false, true, m_strUrl, "", m_imgPath, m_handle, m_img, m_defectList, m_posList, m_clsList, m_areaMap, m_lenMap, m_posMap);
 
         QString pcInfo = m_param.info;
         Functions::saveImage(m_img, m_savePath, imgName, pcInfo, QStringLiteral("超时/"));
@@ -600,7 +600,7 @@ void AiThread::slot_readFinished()
 
 void AiThread::slot_sortResult(int handle, bool isOk, QString level)
 {
-    emit sig_aiResult(isOk, m_strUrl, level, m_imgPath, handle, m_img, m_defectList, m_posList, m_clsList, m_areaMap, m_lenMap, m_posMap);
+    emit sig_aiResult(isOk, false, m_strUrl, level, m_imgPath, handle, m_img, m_defectList, m_posList, m_clsList, m_areaMap, m_lenMap, m_posMap);
 }
 
 void AiThread::slot_sort_info(bool res, QString info, QString level)

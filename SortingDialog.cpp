@@ -21,6 +21,8 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <QIcon>
+#include <QFileDialog>
+#include <QTextCodec>
 
 #include <QDebug>
 
@@ -30,7 +32,9 @@ SortingDialog::SortingDialog(QMap<QString, SortMap> sortMap, const QMap<QString,
 {
     ui->setupUi(this);
     this->setWindowTitle(QStringLiteral("分选设置"));
-   // this->setWindowFlags(Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
+    // this->setWindowFlags(Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
+
+    ui->btnSave->setVisible(false);
 
     m_isInit = true;
     m_sortIndex = 0;
@@ -55,8 +59,8 @@ SortingDialog::SortingDialog(QMap<QString, SortMap> sortMap, const QMap<QString,
     connect(m_delAction,SIGNAL(triggered(bool)),this,SLOT(slot_delActionClicked()));
     connect(m_modifyAction,SIGNAL(triggered(bool)),this,SLOT(slot_modifyActionClicked()));
 
-  //  initEquipTreeWidget();
- //   ui->tw_equip->setVisible(false);
+    //  initEquipTreeWidget();
+    //   ui->tw_equip->setVisible(false);
 
     initDgLevels(dgList);
     initTreeWidget(m_curEquip);
@@ -158,6 +162,15 @@ void SortingDialog::slot_addActionClicked()
         updateSortList();
 
         initTreeWidget(m_curEquip);
+
+        if(!loadTemp("./temp/temp.csv"))
+        {
+            QMessageBox::information(this,QStringLiteral("提示"), QStringLiteral("加载分选模板失败"),QMessageBox::Ok);
+        }
+        else
+        {
+            QMessageBox::information(this,QStringLiteral("提示"), QStringLiteral("加载分选模板完成"),QMessageBox::Ok);
+        }
     }
 }
 
@@ -381,33 +394,33 @@ void SortingDialog::initUi()
 
 void SortingDialog::initEquipTreeWidget()
 {
-//    ui->tw_equip->clear();
+    //    ui->tw_equip->clear();
 
-//    QStringList equipList = m_sortMap.keys();
-//    if(equipList.isEmpty())
-//    {
-//        return;
-//    }
-//    qDebug()<<"len = "<<equipList.length();
-//    for(int i=0; i<equipList.length(); i++)
-//    {
-//        QTreeWidgetItem *group = new QTreeWidgetItem(ui->tw_equip);
-//        group->setText(0, equipList.at(i));
-//        group->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled |  Qt::ItemIsTristate);
-//        group->setCheckState(0, Qt::Checked);
+    //    QStringList equipList = m_sortMap.keys();
+    //    if(equipList.isEmpty())
+    //    {
+    //        return;
+    //    }
+    //    qDebug()<<"len = "<<equipList.length();
+    //    for(int i=0; i<equipList.length(); i++)
+    //    {
+    //        QTreeWidgetItem *group = new QTreeWidgetItem(ui->tw_equip);
+    //        group->setText(0, equipList.at(i));
+    //        group->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled |  Qt::ItemIsTristate);
+    //        group->setCheckState(0, Qt::Checked);
 
-//        SortMap sortMap = m_sortMap.value(equipList.at(i));
-//        qDebug()<<"fuck keys = "<<sortMap.keys();
-//        SortMap::iterator it;
-//        for(it = sortMap.begin(); it != sortMap.end(); it++)
-//        {
-//            QTreeWidgetItem *item = new QTreeWidgetItem(group);
-//            item->setText(0, it.key());
-//            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-//            item->setCheckState(0, Qt::Checked);
-//        }
-//    }
-//    m_curEquip = equipList.at(0);
+    //        SortMap sortMap = m_sortMap.value(equipList.at(i));
+    //        qDebug()<<"fuck keys = "<<sortMap.keys();
+    //        SortMap::iterator it;
+    //        for(it = sortMap.begin(); it != sortMap.end(); it++)
+    //        {
+    //            QTreeWidgetItem *item = new QTreeWidgetItem(group);
+    //            item->setText(0, it.key());
+    //            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+    //            item->setCheckState(0, Qt::Checked);
+    //        }
+    //    }
+    //    m_curEquip = equipList.at(0);
 }
 
 void SortingDialog::initTreeWidget(QString equip)
@@ -452,7 +465,7 @@ void SortingDialog::initTreeWidget(QString equip)
     }
 }
 
-void SortingDialog::updateTableWidget()
+void SortingDialog::updateTableWidget(const QMap<QString,QStringList> &tmpStdMap)
 {
     ui->tableWidget->clear();
 
@@ -462,6 +475,90 @@ void SortingDialog::updateTableWidget()
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget->setHorizontalHeaderLabels(m_horHeader);
     ui->tableWidget->setVerticalHeaderLabels(m_verHeader);
+
+    m_sortList = m_equipSortMap.value(m_curEquip);
+
+    for(int i=0; i< m_verHeader.length(); i++)
+    {
+        QStringList list;
+
+        if(tmpStdMap.count() != 0 && tmpStdMap.count() > i)
+        {
+            list = tmpStdMap.value(m_verHeader.at(i));
+        }
+        qDebug()<<"def "<<m_verHeader.at(i)<<"list "<<list;
+        QTableWidgetItem *item = new QTableWidgetItem();
+        item->setText(m_verHeader.at(i));
+        ui->tableWidget->setItem(i, 0, item);
+
+        for(int j=0; j< m_horHeader.length(); j++)
+        {
+            QString text = "";
+            if(list.length() > j && list.length() != 0)
+            {
+                text = list.at(j);
+            }
+
+            if(j <= 1)
+            {
+                ComboBox *box = new ComboBox();
+                if(list.length() > (j))
+                {
+                    text = list.at(j);
+                    box->setCurrentText(text);
+                }
+                ui->tableWidget->setCellWidget(i, j+1, box);
+            }
+            else if(j == 2)
+            {
+                ComboBox *box = new ComboBox();
+                box->clear();
+                box->addItems(m_dgLevels);
+                if(list.length() > j)
+                {
+                    text = list.at(j);
+                    box->setCurrentText(text);
+                }
+                ui->tableWidget->setCellWidget(i, j+1, box);
+            }
+            else if(j < 5)
+            {
+                QString strMin = "0";
+                QString strMax = "0";
+                if(list.length() > j)
+                    strMin = list.at(2*(j-1) -1 );
+                if(list.length() > j + 1)
+                    strMax = list.at(2*(j-1) );
+                DoubleSpinForm *spinBox = new DoubleSpinForm(this);
+                spinBox->setMinValue(strMin.toDouble());
+                spinBox->setMaxValue(strMax.toDouble());
+                ui->tableWidget->setCellWidget(i, j + 1, spinBox);
+            }
+            else if(j == 5)
+            {
+                QString p1 = "0,0";
+                QString p2 = "0,0";
+                if(list.length() > j+2 )
+                    p1 = list.at(j + 2 );
+                if(list.length() > j +3)
+                    p2 = list.at(j + 3);
+
+                PointForm *form = new PointForm(this);
+                form->setPoint1(p1);
+                form->setPoint2(p2);
+
+                ui->tableWidget->setCellWidget(i, j + 1, form);
+            }
+            else
+            {
+                QSpinBox *box = new QSpinBox();
+                if(list.length() > j + 3)
+                    text = list.at(j + 3);
+                box->setValue(text.toInt());
+                ui->tableWidget->setCellWidget(i, j + 1, box);
+            }
+        }
+    }
 }
 
 void SortingDialog::saveCurrentStd(QString sort)
@@ -689,7 +786,7 @@ void SortingDialog::on_btnApply_clicked()
                 m_sortMap.insert(strEquip, sortMap);
             }
 
-           // equipList.append(strEquip);
+            // equipList.append(strEquip);
             sortList.append(strSort);
         }
         ++it;
@@ -703,7 +800,7 @@ void SortingDialog::slot_onTableWidgetContexMenu(QPoint point)
     int y = point.y() + 15;
     QPoint tmpPoint(x, y);
 
-  //  int row = ui->tableWidget->horizontalHeader()->rootIndex()
+    //  int row = ui->tableWidget->horizontalHeader()->rootIndex()
 
     m_tabMenu->exec(ui->tableWidget->mapToGlobal(tmpPoint));
 }
@@ -844,4 +941,177 @@ void SortingDialog::on_btnSave_clicked()
             }
         }
     }
+}
+
+void SortingDialog::on_btnLoad_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, QStringLiteral("文件"), "", "Csv(*.csv)");
+    if(!loadTemp(fileName))
+    {
+        QMessageBox::information(this,QStringLiteral("提示"), QStringLiteral("加载分选模板失败"),QMessageBox::Ok);
+    }
+    else
+    {
+        QMessageBox::information(this,QStringLiteral("提示"), QStringLiteral("加载分选模板完成"),QMessageBox::Ok);
+    }
+}
+
+bool SortingDialog::loadTemp(const QString &fileName)
+{
+    QFile file(fileName);
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug()<<fileName<<"open sort file failed";
+        return false;
+    }
+
+    QTextStream ts(&file);
+    ts.setCodec(QTextCodec::codecForName("GB2312"));
+    QMap <QString,QStringList> sortMap;
+    bool value = true;
+    forever
+    {
+        QString line = ts.readLine();
+        //    qDebug()<<"line len "<<line.split(",").length()<<" m_horHeader len "<<m_horHeader.length();
+        if(value)
+        {
+            value = false;
+            continue;
+        }
+        if(line.split(",").length() != (m_horHeader.length() + 3))
+        {
+            break;
+        }
+
+        QStringList dataList = line.split(",");
+        QString strDef = dataList.at(0);
+        QString p1 = dataList.at(8);
+        QString p2 = dataList.at(9);
+
+        p1 = p1.replace(";", ",");
+        p2 = p2.replace(";", ",");
+        qDebug()<<"P1 "<<p1<<" P2 "<<p2;
+        dataList.replace(8, p1);
+        dataList.replace(9, p2);
+        dataList.removeAt(0);
+        qDebug()<<__FUNCTION__<<"Defect "<<strDef<<" sort "<<dataList;
+
+        if(m_verHeader.contains(strDef))
+        {
+            sortMap.insert(strDef, dataList);
+        }
+    }
+
+    file.close();
+
+    updateTableWidget(sortMap);
+
+    return true;
+}
+
+void SortingDialog::on_btnExport_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, QStringLiteral("保存"), "", "Csv(*.csv)");
+    if(fileName.isEmpty())
+    {
+        QMessageBox::information(this,QStringLiteral("提示"), QStringLiteral("文件名不能为空"), QMessageBox::Ok);
+        return;
+    }
+
+    QFile file(fileName);
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        qDebug()<<__FUNCTION__<<fileName<<"open failed";
+        return;
+    }
+
+    QTextStream ts(&file);
+    ts.setCodec(QTextCodec::codecForName("GB2312"));
+    ts<<QStringLiteral("缺陷,")<<QStringLiteral("是否允许,")<<QStringLiteral("贯串,")<<QStringLiteral("对比度等级,")
+     <<QStringLiteral("单片面积下限(%),")<<QStringLiteral("单片面积上限(%),")<<QStringLiteral("单片长度下限(%),")
+    <<QStringLiteral("单片长度上限(%),")<<QStringLiteral("坐标P1(单片),")<<QStringLiteral("坐标P2(单片),")
+    <<QStringLiteral("单片缺陷个数,")<<QStringLiteral("组件缺陷个数,")<<QStringLiteral("损坏片数")<<endl;
+
+    int row = ui->tableWidget->rowCount();
+
+    for(int i=0; i<row; i++)
+    {
+        QString text = ui->tableWidget->item(i, 0)->text();
+        if(text == QString(""))
+        {
+            continue;
+        }
+        ts<<text<<",";
+
+        for(int j=1; j<m_horHeader.length(); j++)
+        {
+            QString text = "";
+            if(j <= 3)
+            {
+                ComboBox *item = (ComboBox*)ui->tableWidget->cellWidget(i, j);
+                text = item->currentText();
+                ts<<text<<",";
+            }
+            else if(j < 6)
+            {
+                DoubleSpinForm *box = (DoubleSpinForm*)ui->tableWidget->cellWidget(i , j);
+                double min = box->getMinValue();
+                double max = box->getMaxValue();
+
+                ts<<min<<","<<max<<",";
+            }
+            else if(j == 6)
+            {
+                PointForm *form = (PointForm*)ui->tableWidget->cellWidget(i, j);
+                QString p1 = form->getPoint1();
+                QString p2 = form->getPoint2();
+
+                QStringList list1 = p1.split(",");
+                QString tmpStr1 = list1.at(0);
+                QString tmpStr2 = list1.at(1);
+                if(list1.at(0) == "")
+                {
+                    tmpStr1 = "0";
+                }
+                if(list1.at(1) == "")
+                {
+                    tmpStr2 = "0";
+                }
+                p1 = tmpStr1 + ";" + tmpStr2;
+
+                list1 = p2.split(",");
+                tmpStr1 = list1.at(0);
+                tmpStr2 = list1.at(1);
+                if(list1.at(0) == "")
+                {
+                    tmpStr1 = "0";
+                }
+                if(list1.at(1) == "")
+                {
+                    tmpStr2 = "0";
+                }
+                p2 = tmpStr1 + ";" + tmpStr2;
+
+                ts<<p1<<","<<p2<<",";
+            }
+            else
+            {
+                QSpinBox *box = (QSpinBox*)ui->tableWidget->cellWidget(i, j);
+                int value = box->value();
+                text = QString::number(value);
+                if(j == m_horHeader.length() - 1)
+                {
+                   ts<<text;
+                }
+                else
+                {
+                    ts<<text<<",";
+                }
+            }
+        }
+        ts<<endl;
+    }
+    file.close();
+
+    QMessageBox::information(this,QStringLiteral("提示"), QStringLiteral("导出分选完成"), QMessageBox::Ok);
 }

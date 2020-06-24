@@ -307,6 +307,16 @@ void SettingsDialog::setWkshop(const QString &wkshop)
     ui->lineEdit_wkshop->setText(wkshop);
 }
 
+int SettingsDialog::getNgDlgModel() const
+{
+    return ui->cmbBox_ngDlg->currentIndex();
+}
+
+void SettingsDialog::setNgDlgModel(const int model)
+{
+    ui->cmbBox_ngDlg->setCurrentIndex(model);
+}
+
 QString SettingsDialog::getSavePath2() const
 {
     return m_savePath2;

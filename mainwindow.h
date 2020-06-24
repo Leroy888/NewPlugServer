@@ -26,6 +26,7 @@
 #include "model/ExcelSaver.h"
 #include <QCloseEvent>
 #include "model/HeartTimer.h"
+#include "logic/Logic.h"
 
 
 namespace Ui {
@@ -42,7 +43,6 @@ public:
 
     void initUi();
     void initTableWidget_data();
-    void initDB();
     void initDB2();
     void readEquip();
     void readSorting(QString equip, QStringList sortList);
@@ -55,7 +55,6 @@ public:
     void sendResultToEl(QImage img, bool value, QStringList defList, QString strRes);
     void sendResultToEl(bool value, QString strRes);
     void getResult(bool value);
-    void readSettings();
     void sendImageToAi(QString &imgPath, QString &url, int handle);
     void semdImageToAi(QString &imgPath, QString &url, int handle, SortThread &sortThd);
 
@@ -64,6 +63,13 @@ public:
 
     void updateDB2Recipe(const QString &product, const QString &sort);
     void updateDB2Sort(const QString &product, const QString &sortText, QMap<QString, QStringList> &defMap);
+
+    //插入返修表
+    void insertPathEx(QSqlDatabase &db, const QString barCode, const QString code, const QString sharePath);
+    void removeImageForm(ImgForm *form);
+    void appendText(const QString &text);
+    void updateAiDisconnected(const QString &url);
+    void setBtnsEnabled(bool value);
 signals:
     void ServerRecved(qintptr, QTcpSocket*, const QByteArray &);
     void readyReadData(qintptr, QTcpSocket*);
@@ -110,11 +116,7 @@ private slots:
     void slot_applySorting(QString equip, QStringList verHeader, QString sortText, SortMap sortMap);
     void slot_deleteSorting(const QString &equip, const QString &curSort, const QStringList &sortList);
 
-    void on_btnTest_clicked();
-
-    void slot_testTimeout();
-
-    void slot_aiResult(bool isOk, QString url, QString level, QString imgPath, int handle, QImage img, QStringList defList, QStringList posList,
+    void slot_aiResult(bool isOk, bool bTimeout, QString url, QString level, QString imgPath, int handle, QImage img, QStringList defList, QStringList posList,
                        QStringList clsList, AiDataMap areaMap, AiDataMap lenMap, QMap<QString, QStringList> posMap);//AI返回结果
     void on_btnPic_clicked();
     void slot_aiDisconnect(QString url, int handle);
@@ -138,14 +140,18 @@ private slots:
 
     void slot_clear(int handle);
     void slot_heartTimeout(int handle);
+    void on_btnUpdate_clicked();
+
 private:
     Ui::MainWindow *ui;
-    TcpServer *tcp_server_;
-    QStandardItemModel *model_;
+
+    Logic* m_logic;
+
     int m_row;
     int m_column;
     QMap<QString,ClientForm*> m_clientMap;
     QMap<int,QTcpSocket*> m_socketMap;
+
   //  QMap<int,HeartTimer*> m_timerMap;
     int m_handle;
     QGraphicsPixmapItem* m_pixmapItem;
@@ -179,6 +185,7 @@ private:
     QStringList m_dgList;
     QString m_wkshop;
     int m_imgModel;
+    int m_ngDlgModel;
 
     QList<QStringList> m_stdList;   //标准
     QStringList m_horHeader;    //水平表头
@@ -217,7 +224,6 @@ private:
     QList<QStringList> m_positionLists;
     QList<QStringList> m_classLists;
 
-    QTimer *m_testTimer;
     int m_testNum;
     QStringList m_testAiList;
     int m_testIndex;
@@ -244,16 +250,14 @@ private:
     DB_Param m_dbParam2;
     QStringList m_sqlHeader;
 
-    QMap<QString, bool> m_statusMap;    //AI端口状态列表
+    QMap<QString, AiStatus> m_statusMap;    //AI端口状态列表
     QList<QMap<QString,int>>  m_unSendImgList;
     bool m_isInit;
     QMap<QString,QString> m_equipProductMap;    //每个设备对应的产品批次Map
     QMap<QString,QString> m_equipLineMap;   //设备对应的线别
 
-    ExcelSaver *m_excelSaver;
-  //  QTimer *m_heartTimer;
-
-
+    QString m_shareIP;
+    QString m_shareFolderName;
 };
 
 #endif // MAINWINDOW_H

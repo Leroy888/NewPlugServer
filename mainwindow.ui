@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1322</width>
-    <height>683</height>
+    <width>1331</width>
+    <height>681</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,22 +18,415 @@
     <normaloff>:/images/images/opt.ico</normaloff>:/images/images/opt.ico</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QGridLayout" name="gridLayout_6">
+   <layout class="QGridLayout" name="gridLayout">
     <property name="leftMargin">
      <number>6</number>
     </property>
     <property name="topMargin">
-     <number>3</number>
+     <number>6</number>
     </property>
     <property name="rightMargin">
      <number>6</number>
     </property>
     <property name="bottomMargin">
-     <number>3</number>
+     <number>6</number>
     </property>
-    <property name="spacing">
-     <number>3</number>
-    </property>
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_10">
+      <item>
+       <widget class="QPushButton" name="btnOk">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="Res.qrc">
+          <normaloff>:/images/images/ok.ico</normaloff>:/images/images/ok.ico</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>36</width>
+          <height>36</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnNg">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="Res.qrc">
+          <normaloff>:/images/images/ng.ico</normaloff>:/images/images/ng.ico</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>36</width>
+          <height>36</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnSettings">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>系统
+设置</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Res.qrc">
+          <normaloff>:/images/images/setting.ico</normaloff>:/images/images/setting.ico</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>26</width>
+          <height>26</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnImgSet">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>图像
+设置</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Res.qrc">
+          <normaloff>:/images/images/imgSet.ico</normaloff>:/images/images/imgSet.ico</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>26</width>
+          <height>26</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnAiUrlSet">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>端口
+设置</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Res.qrc">
+          <normaloff>:/images/images/aiPort.ico</normaloff>:/images/images/aiPort.ico</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>26</width>
+          <height>26</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnSort">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>分选
+设置</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Res.qrc">
+          <normaloff>:/images/images/sorting.png</normaloff>:/images/images/sorting.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>36</width>
+          <height>36</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnUpdate">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>39</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>更新
+端口</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Res.qrc">
+          <normaloff>:/images/images/update.png</normaloff>:/images/images/update.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>26</width>
+          <height>26</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cmbBox_aiStatus">
+        <property name="minimumSize">
+         <size>
+          <width>218</width>
+          <height>31</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_status">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>8</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Minimum</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>6</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="btnPic">
+            <property name="minimumSize">
+             <size>
+              <width>66</width>
+              <height>23</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>66</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>图像</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Res.qrc">
+              <normaloff>:/images/images/solar.png</normaloff>:/images/images/solar.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>36</width>
+              <height>36</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnList">
+            <property name="minimumSize">
+             <size>
+              <width>66</width>
+              <height>23</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>66</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>总览</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Res.qrc">
+              <normaloff>:/images/images/list.png</normaloff>:/images/images/list.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>36</width>
+              <height>18</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnData">
+            <property name="minimumSize">
+             <size>
+              <width>66</width>
+              <height>23</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>66</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>数据</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Res.qrc">
+              <normaloff>:/images/images/query.ico</normaloff>:/images/images/query.ico</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>36</width>
+              <height>21</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
     <item row="1" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="styleSheet">
@@ -65,7 +458,83 @@
         <item row="0" column="0">
          <widget class="GraphicsView" name="graphicsView"/>
         </item>
-        <item row="0" column="1">
+        <item row="1" column="0">
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>78</height>
+           </size>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents_3">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1096</width>
+             <height>76</height>
+            </rect>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <property name="leftMargin">
+             <number>2</number>
+            </property>
+            <property name="topMargin">
+             <number>2</number>
+            </property>
+            <property name="rightMargin">
+             <number>2</number>
+            </property>
+            <property name="bottomMargin">
+             <number>2</number>
+            </property>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_11">
+              <property name="spacing">
+               <number>2</number>
+              </property>
+              <item>
+               <layout class="QHBoxLayout" name="horLayout">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <property name="leftMargin">
+                 <number>3</number>
+                </property>
+                <property name="topMargin">
+                 <number>3</number>
+                </property>
+                <property name="rightMargin">
+                 <number>3</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>3</number>
+                </property>
+               </layout>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>68</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item row="0" column="1" rowspan="2">
          <widget class="QTextEdit" name="textEdit">
           <property name="maximumSize">
            <size>
@@ -76,72 +545,6 @@
           <property name="styleSheet">
            <string notr="true">font: 75 10pt &quot;Arial&quot;;</string>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="0" colspan="2">
-         <widget class="QGroupBox" name="groupBox_2">
-          <property name="title">
-           <string/>
-          </property>
-          <layout class="QGridLayout" name="gridLayout">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-           <property name="horizontalSpacing">
-            <number>1</number>
-           </property>
-           <property name="verticalSpacing">
-            <number>0</number>
-           </property>
-           <item row="0" column="0">
-            <layout class="QHBoxLayout" name="horizontalLayout_11">
-             <property name="spacing">
-              <number>2</number>
-             </property>
-             <item>
-              <layout class="QHBoxLayout" name="horLayout">
-               <property name="spacing">
-                <number>3</number>
-               </property>
-               <property name="leftMargin">
-                <number>3</number>
-               </property>
-               <property name="topMargin">
-                <number>3</number>
-               </property>
-               <property name="rightMargin">
-                <number>3</number>
-               </property>
-               <property name="bottomMargin">
-                <number>3</number>
-               </property>
-              </layout>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>0</width>
-                 <height>68</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </item>
-          </layout>
          </widget>
         </item>
        </layout>
@@ -443,420 +846,6 @@
        </layout>
       </widget>
      </widget>
-    </item>
-    <item row="0" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout_10">
-      <item>
-       <widget class="QPushButton" name="btnOk">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/images/images/ok.ico</normaloff>:/images/images/ok.ico</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnNg">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/images/images/ng.ico</normaloff>:/images/images/ng.ico</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnSettings">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>60</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>系统
-设置</string>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/images/images/setting.ico</normaloff>:/images/images/setting.ico</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnImgSet">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>60</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>图像
-设置</string>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/images/images/imgSet.ico</normaloff>:/images/images/imgSet.ico</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnAiUrlSet">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>60</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>端口
-设置</string>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/images/images/aiPort.ico</normaloff>:/images/images/aiPort.ico</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>26</width>
-          <height>26</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnSort">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>分选
-设置</string>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/images/images/sorting.png</normaloff>:/images/images/sorting.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnTest">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>39</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="Res.qrc">
-          <normaloff>:/images/images/start.ico</normaloff>:/images/images/start.ico</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>36</width>
-          <height>36</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_status">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>308</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <property name="spacing">
-         <number>0</number>
-        </property>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Minimum</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>6</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <property name="spacing">
-           <number>3</number>
-          </property>
-          <item>
-           <widget class="QPushButton" name="btnPic">
-            <property name="minimumSize">
-             <size>
-              <width>66</width>
-              <height>23</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>66</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>图像</string>
-            </property>
-            <property name="icon">
-             <iconset resource="Res.qrc">
-              <normaloff>:/images/images/solar.png</normaloff>:/images/images/solar.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>36</width>
-              <height>36</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnList">
-            <property name="minimumSize">
-             <size>
-              <width>66</width>
-              <height>23</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>66</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>总览</string>
-            </property>
-            <property name="icon">
-             <iconset resource="Res.qrc">
-              <normaloff>:/images/images/list.png</normaloff>:/images/images/list.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>36</width>
-              <height>18</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnData">
-            <property name="minimumSize">
-             <size>
-              <width>66</width>
-              <height>23</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>66</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>数据</string>
-            </property>
-            <property name="icon">
-             <iconset resource="Res.qrc">
-              <normaloff>:/images/images/query.ico</normaloff>:/images/images/query.ico</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>36</width>
-              <height>21</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnTest_2">
-            <property name="minimumSize">
-             <size>
-              <width>66</width>
-              <height>23</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>66</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>测试</string>
-            </property>
-            <property name="icon">
-             <iconset resource="Res.qrc">
-              <normaloff>:/images/images/start.ico</normaloff>:/images/images/start.ico</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>36</width>
-              <height>21</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </item>
-     </layout>
     </item>
    </layout>
   </widget>

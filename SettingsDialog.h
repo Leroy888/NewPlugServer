@@ -76,6 +76,9 @@ public:
     QString getWkshop() const;
     void setWkshop(const QString &wkshop);
 
+    int getNgDlgModel() const;
+    void setNgDlgModel(const int model);
+
     DB_Param getDbParam2() const;
 protected:
     void readSettings(QString fileName);
@@ -119,6 +122,7 @@ private:
     QStringList m_dgList;
     int m_modelIndex;
     int m_imgModel;
+    bool m_bShow;
 
     //数据库变量
     DB_Param m_dbParam;

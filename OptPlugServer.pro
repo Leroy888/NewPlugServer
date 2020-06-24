@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+    logic/Logic.cpp \
         main.cpp \
         mainwindow.cpp \
     tcp_server.cpp \
@@ -62,6 +63,7 @@ SOURCES += \
     model/HeartTimer.cpp
 
 HEADERS += \
+    logic/Logic.h \
         mainwindow.h \
     tcp_server.h \
     tcp_server_private.h \

@@ -128,6 +128,20 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="btnLoad">
+       <property name="text">
+        <string>导入</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnExport">
+       <property name="text">
+        <string>导出</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="btnSave">
        <property name="text">
         <string>另存</string>

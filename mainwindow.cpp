@@ -28,6 +28,7 @@
 #include "view/PwdDialog.h"
 #include <QTextCodec>
 #include <QThread>
+#include <QSqlError>
 
 #include <QDebug>
 
@@ -35,6 +36,7 @@
 #define COLUMN 3
 #define DB_COLUMN 9
 #define SORT_COLUMN 15
+#define AI_TIMEOUT_COUNT 3
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -45,50 +47,15 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle(QStringLiteral("OptPlugServer"));
     this->showMaximized();
 
-    connect(this, SIGNAL(ServerRecved(qintptr,QTcpSocket*,QByteArray)), this, SLOT(ServerRecvedSlot(qintptr,QTcpSocket*,QByteArray)));
-    connect(this, SIGNAL(readyReadData(qintptr, QTcpSocket*)),this,SLOT(readData(qintptr,QTcpSocket*)));
-    model_ = new QStandardItemModel(this);
-
-    tcp_server_ = new TcpServer(this);
-    if(!tcp_server_->listen(QHostAddress::Any, 8000)) {
-        qDebug()<<tcp_server_->errorString();    //错误信息
-        return;
-    }
-    qDebug()<<"listening";    //错误信息
-    model_->insertRow(0,new QStandardItem("listening"));
-    connect(tcp_server_,
-            &TcpServer::ClientConnected,
-            this,
-            &MainWindow::ClientConnected);//监听
-    connect(tcp_server_,
-            &TcpServer::ClientDisconnected,
-            this,
-            &MainWindow::ClientDisconnected);//监听
-
-    m_excelSaver = new ExcelSaver();
-
-//    m_heartTimer = new QTimer(this);
-//    connect(m_heartTimer,SIGNAL(timeout()),this,SLOT(slot_heatTimeout()));
-//    m_heartTimer->start(50000);
-
-    m_testTimer = new QTimer;
-    connect(m_testTimer,SIGNAL(timeout()),this,SLOT(slot_testTimeout()));
-
-    m_ImgForm = nullptr;
-    m_handle = -1;
-    m_isFinished = true;
-    m_sortNum = 0;
-
-    ui->btnTest->setVisible(false);
-
-    readSettings();
+    m_logic = new Logic(this, m_clientMap);
+    m_imgParamMap = m_logic->getImgParamMap();
 
     initUi();
     init_Tb_client();
     initTableWidget_data();
 
-    initDB2();
-    initDB();
+    //initDB2();
+
     readEquip();
     initLogic();
 
@@ -97,130 +64,13 @@ MainWindow::MainWindow(QWidget *parent) :
               <<"minLen"<<"maxLen"<<"point1"<<"point2"<<"count_p"<<"count"<<"count_aff";
 
     m_isInit = true;
+
+
 }
 
-MainWindow::~MainWindow() {
-    tcp_server_->close();
-    delete tcp_server_;
-    delete ui;
-}
-
-void MainWindow::readSettings()
+MainWindow::~MainWindow()
 {
-    clsSettings *settings = new clsSettings("./cfg/Settings.ini");
-    QString strNode;
-    strNode = QString("System/");
-    settings->readSetting(strNode + "delaySecs", m_delaySecs);
-    settings->readSetting(strNode + "horPieces", m_horPieces);
-    settings->readSetting(strNode + "verPieces", m_verPieces);
-    settings->readSetting(strNode + "upPixel", m_topPixel);
-    settings->readSetting(strNode + "bottomPixel", m_bottomPixel);
-    settings->readSetting(strNode + "leftPixel", m_leftPixel);
-    settings->readSetting(strNode + "rightPixel", m_rightPixel);
-    settings->readSetting(strNode + "modelIndex", m_modelIndex);
-    settings->readSetting(strNode + "savePath", m_savePath);
-    settings->readSetting(strNode + "orderList", m_productList);
-    settings->readSetting(strNode + "curOrder", m_strOrder);
-    settings->readSetting(strNode + "dgList", m_dgList);
-    settings->readSetting(strNode + "wkshop", m_wkshop);
-    settings->readSetting(strNode + "imgModel", m_imgModel);
-
-    strNode = QString("Database/");
-    settings->readSetting(strNode + "dbIp", m_dbParam.ip);
-    settings->readSetting(strNode + "dbName", m_dbParam.name);
-    settings->readSetting(strNode + "dbUser", m_dbParam.user);
-    settings->readSetting(strNode + "dbPwd", m_dbParam.pwd);
-    m_dbParam.port = 3306;
-
-    settings->readSetting(strNode + "dbIp2", m_dbParam2.ip);
-    settings->readSetting(strNode + "dbName2", m_dbParam2.name);
-    settings->readSetting(strNode + "dbUser2", m_dbParam2.user);
-    settings->readSetting(strNode + "dbPwd2", m_dbParam2.pwd);
-    m_dbParam2.port = 3306;
-
-    strNode = QString("Standard/");
-    settings->readSetting(strNode + "def_num", m_stdNum);
-    settings->readSetting(strNode + "horHeader", m_horHeader);
-    settings->readSetting(strNode + "verHeader", m_verHeader);
-    settings->readSetting(strNode + "sortList", m_sortList);
-    settings->readSetting(strNode + "pcList", m_pcList);
-
-    strNode = QString("ImgParam/");
-    int devNum;
-    settings->readSetting(strNode + "devNum", devNum);
-    for(int i=1; i<devNum + 1; i++)
-    {
-        QString strDev;
-        settings->readSetting(strNode + QString("dev_%1").arg(QString::number(i)), strDev);
-
-        QString line;
-        settings->readSetting(strNode + QString("line_%1").arg(QString::number(i)), line);
-        m_equipLineMap.insert(strDev, line);
-
-        QList<double> imgParamList;
-        settings->readSetting(strNode + QString("param_%1").arg(QString::number(i)), imgParamList);
-        m_imgParamMap.insert(strDev, imgParamList);
-
-        QString product;
-        settings->readSetting(strNode + QString("product_%1").arg(QString::number(i)), product);
-        m_equipProductMap.insert(strDev, product);
-    }
-
-    strNode = QString("MesDef/");
-    int mesDefNum = 0;
-    settings->readSetting(strNode + "mesDefNum", mesDefNum);
-    for(int i=1; i<mesDefNum + 1; i++)
-    {
-        QString strMesDef;
-        settings->readSetting(strNode + QString("mesDef_%1").arg(QString::number(i)), strMesDef);
-        m_mesDefList.append(strMesDef);
-    }
-
-    strNode = QString("AiUrl/");
-    int portNum;
-    settings->readSetting(strNode + "urlNum", portNum);
-    for(int i=1; i<portNum + 1; i++)
-    {
-        QString strUrl;
-        QString key = QString("url_%1").arg(QString::number(i));
-        settings->readSetting(strNode + key, strUrl);
-        m_statusMap.insert(strUrl, false);
-    }
-
-    strNode = QString("AiModel/");
-    QString clsNode = QString("AiClass/");
-
-    int defNum;
-    settings->readSetting(strNode + "DefectNum", defNum);
-    for(int i=1; i< defNum+1; i++)
-    {
-        QString defNode = QString("defect_%1").arg(QString::number(i));
-        QString strDef ;
-        settings->readSetting(strNode + defNode,strDef);
-
-        QString strCls;
-        settings->readSetting(clsNode + QString("cls_%1").arg(QString::number(i)), strCls);
-
-        m_defMap[i] = strDef;
-        m_clsMap[strDef] = strCls;
-    }
-
-    for(int i=0; i < m_sortList.length(); i++)
-    {
-        QString key = m_sortList.at(i);
-        QMap<QString,QStringList> defMap;
-        for(int j=0; j<m_verHeader.length(); j++)
-        {
-            QStringList list;
-            strNode = QString("SortStd_%1/").arg(QString::number(i));
-            QString tmpKey = QString("def_%1").arg(QString::number(j));
-            settings->readSetting(strNode + tmpKey, list);
-            defMap.insert(tmpKey, list);
-        }
-        m_stdMap.insert(key, defMap);
-    }
-
-    delete settings;
+    delete ui;
 }
 
 void MainWindow::sendImageToAi(QString &imgPath, QString &url, int handle)
@@ -230,7 +80,8 @@ void MainWindow::sendImageToAi(QString &imgPath, QString &url, int handle)
     QList<double> list = m_imgParamMap.value(equip);
     if(list.length() < 5)
     {
-        m_statusMap.insert(url, false);
+        AiStatus status;
+        m_statusMap.insert(url, status);
         QMessageBox::information(this,QStringLiteral("提示"), QStringLiteral("图像设置里没有找到相应的设备号:\n") + equip, QMessageBox::Ok);
         return;
     }
@@ -259,8 +110,8 @@ void MainWindow::sendImageToAi(QString &imgPath, QString &url, int handle)
 
     qRegisterMetaType<AiDataMap>("AiDataMap");
     qRegisterMetaType<QMap<QString,QStringList> >("AiPosMap");
-    connect(thd,SIGNAL(sig_aiResult(bool,QString,QString,QString,int,QImage,QStringList,QStringList,QStringList,AiDataMap,AiDataMap,QMap<QString,QStringList>)),
-            this,SLOT(slot_aiResult(bool,QString,QString,QString,int,QImage,QStringList,QStringList,QStringList,AiDataMap,AiDataMap,QMap<QString,QStringList>)));
+    connect(thd,SIGNAL(sig_aiResult(bool,bool,QString,QString,QString,int,QImage,QStringList,QStringList,QStringList,AiDataMap,AiDataMap,QMap<QString,QStringList>)),
+            this,SLOT(slot_aiResult(bool,bool,QString,QString,QString,int,QImage,QStringList,QStringList,QStringList,AiDataMap,AiDataMap,QMap<QString,QStringList>)));
     connect(thd,SIGNAL(sig_aiDisConnect(QString,int)),this,SLOT(slot_aiDisconnect(QString,int)));
     connect(thd,SIGNAL(sig_sortResult(int,bool,QString)),this,SLOT(slot_sortResult(int,bool,QString)));
     connect(thd,SIGNAL(sig_sort_info(bool,QString,QString,int,QString)),this,SLOT(slot_sort_info(bool,QString,QString,int,QString)));
@@ -275,6 +126,8 @@ void MainWindow::semdImageToAi(QString &imgPath, QString &url, int handle, SortT
 
 void MainWindow::updateDB()
 {
+    if(m_db2.isOpen()==false) return;
+
     QSqlQuery query(m_db2);
     QString equip = QString("M1-L2-EL3-WG1");
     QString sql = QString("select * from tab_product where equip = '%1'").arg(equip);
@@ -312,10 +165,10 @@ void MainWindow::slot_aiJudge()
 
 void MainWindow::initUi()
 {
-    ui->btnTest_2->setVisible(false);
     ui->textEdit->setReadOnly(true);
     ui->btnOk->setEnabled(false);
     ui->btnNg->setEnabled(false);
+    ui->btnUpdate->setEnabled(false);
     ui->btnOk->setShortcut(Qt::Key_1);
     ui->btnNg->setShortcut(Qt::Key_9);
     m_pixmapItem = NULL;
@@ -387,27 +240,6 @@ void MainWindow::initTableWidget_data()
          <<QStringLiteral("    AI结果    ")<<QStringLiteral("    复判结果    ")<<QStringLiteral("    缺陷信息    ")
         <<QStringLiteral("测试时间")<<QStringLiteral("保存路径")<<QStringLiteral("分选等级");
     ui->tableWidget_data->setHorizontalHeaderLabels(header);
-}
-
-void MainWindow::initDB()
-{
-    qlonglong id = (qlonglong)QThread::currentThreadId();
-    m_db = QSqlDatabase::addDatabase("QMYSQL",QString::number(id));
-    m_db.setHostName(m_dbParam.ip);
-    m_db.setDatabaseName(m_dbParam.name);
-    m_db.setUserName(m_dbParam.user);
-    m_db.setPort(m_dbParam.port);
-    m_db.setPassword(m_dbParam.pwd);
-    if(!m_db.open())
-    {
-        QMessageBox::warning(this,QStringLiteral("提示"),QStringLiteral("数据库连接失败"),QMessageBox::Ok);
-        return;
-    }
-    else
-    {
-
-    }
-    m_db.exec("set NAMES UTF8");
 }
 
 void MainWindow::initDB2()
@@ -527,9 +359,8 @@ void MainWindow::update_Tb_client(const QString &strInfo, const int handle, bool
     slot_clientSwitch(handle, strInfo, value);
 }
 
-void MainWindow::ClientConnected(qintptr handle, QTcpSocket* socket) {
-    model_->insertRow(0,new QStandardItem(QString::number(handle)+" connected"));
-
+void MainWindow::ClientConnected(qintptr handle, QTcpSocket* socket)
+{
     socket->write("connected");
 
     m_socketMap.insert(handle, socket);
@@ -555,8 +386,6 @@ void MainWindow::ClientConnected(qintptr handle, QTcpSocket* socket) {
 
 void MainWindow::ClientDisconnected(qintptr handle)
 {
-    model_->insertRow(0,new QStandardItem(QString::number(handle)+" disconnected"));
-
     QString strInfo = m_paramMap.value(handle).info;
     m_socketMap.remove(handle);
 //    m_timerMap.remove(handle);
@@ -572,11 +401,6 @@ void MainWindow::ServerRecvedSlot(qintptr handle, QTcpSocket *socket, const QByt
     QMutex mutex;
     mutex.lock();
     Q_UNUSED(handle);
-
-    QString send_data = QString("%1 %2").
-            arg(socket->peerAddress().toString()).
-            arg(socket->peerPort());
-    model_->insertRow(0,new QStandardItem(send_data));
 
     if(m_modelIndex == 1)
     {
@@ -605,9 +429,18 @@ void MainWindow::ServerRecvedSlot(qintptr handle, QTcpSocket *socket, const QByt
     int ngNum = jObj.value("NG_Num").toInt();
     int missNum = jObj.value("WP_Num").toInt();
     int errorNum = jObj.value("LP_Num").toInt();
-    QString line = m_equipLineMap.value(info);
+    QString imgName = QString::fromLocal8Bit(jObj.value("Path").toString().toLocal8Bit().data());
+    QString barCode = jObj.value("BarCode").toString();
+    QString ngBarcode = jObj.value("NG_Bar").toString();
+    QString ngCode = jObj.value("NG_Code").toString();
+    QString ngSharePath = QString::fromLocal8Bit(jObj.value("NG_Shpath").toString().toLocal8Bit().data());
+    QString strRecvInfo1 = QString("====ServerRecvedSlot: EL--->YRDJ. EL_id=%1 OK_Num=%2 NG_Num=%3 WP_Num=%4 LP_Num=%5").arg(info).arg(QString::number(okNum)).arg(QString::number(ngNum)).arg(QString::number(missNum)).arg(QString::number(errorNum));
+    QString strRecvInfo2 = QString("====ServerRecvedSlot: EL--->YRDJ. Path=%1 BarCode=%2 NG_Bar=%3 NG_Code=%4 NG_Shpath=%5").arg(imgName).arg(barCode).arg(ngBarcode).arg(ngCode).arg(ngSharePath);
+    qDebug()<< strRecvInfo1;
+    qDebug()<< strRecvInfo2;
 
     //更新每个数据
+    QString line = m_equipLineMap.value(info);
     ClientParam param = m_paramMap.value(handle);
     param.okNum = okNum;
     param.ngNum = ngNum;
@@ -615,6 +448,7 @@ void MainWindow::ServerRecvedSlot(qintptr handle, QTcpSocket *socket, const QByt
     param.errorNum = errorNum;
     param.info = info;
     param.line = line;
+    param.barCode= barCode;
     m_paramMap.insert(handle, param);
 
     //更新数据到客户端列表
@@ -627,8 +461,7 @@ void MainWindow::ServerRecvedSlot(qintptr handle, QTcpSocket *socket, const QByt
     form->setParam(param);
     form->setClientEnabled(true);
 
-    QString imgName = QString::fromLocal8Bit(jObj.value("Path").toString().toLocal8Bit().data());
-    qDebug()<<"image name "<<imgName;
+
     QStringList pathList = m_equipPathMap.value(info);
     pathList.append(pathList);
     m_equipPathMap.insert(info, pathList);
@@ -643,10 +476,34 @@ void MainWindow::ServerRecvedSlot(qintptr handle, QTcpSocket *socket, const QByt
         //  slot_clientSwitch(handle, info, true);
         // readEquip(info);
     }
-    if(imgName == "")
+
+    //场景2：客户端通知一人多机保存NG到返修表
+    if(!ngCode.isEmpty() && !ngSharePath.isEmpty())
     {
+        if(m_modelIndex == 0) //常规模式。需要登记到返修表格
+        {
+            qDebug()<<"====ServerRecvedSlot: get save-respair cmd. work mode, save to repair table...";
+            insertPathEx(m_db,ngBarcode,ngCode,ngSharePath);
+
+            mutex.unlock();
+            return;
+        }
+        else
+        {
+            qDebug()<<"====ServerRecvedSlot: get save-respair cmd. test mode, not save to repair table.";
+        }
+    }
+
+    //场景1：新图到了处理
+    //新图到了
+    if(imgName.isEmpty())
+    {
+        mutex.unlock();
         return;
     }
+
+    qDebug()<<"====ServerRecvedSlot: image name="<<imgName<<" BarCode="<<barCode;
+
     //将从外挂接收到的图片发送到AI服务器
     QString url = getUrl();
     if(url != "")
@@ -671,13 +528,15 @@ QString MainWindow::getUrl()
     mutex.lock();
 
     QString url;
-    QMap<QString,bool>::iterator it;
+    QMap<QString,AiStatus>::iterator it;
     for(it = m_statusMap.begin(); it != m_statusMap.end(); it++)
     {
-        if(!it.value() && it.key() != "")
+        AiStatus status = it.value();
+        if(!status.isBusy && it.key() != "")
         {
             url = it.key();
-            m_statusMap.insert(url, true);
+            status.isBusy = true;
+            m_statusMap.insert(url, status);
             qDebug()<<it.key()<<" is free";
             break;
         }
@@ -913,177 +772,26 @@ void MainWindow::sendResultToEl(bool value, QString strRes)
 
 void MainWindow::on_btnOk_clicked()
 {
-    if(m_aiTimer->isActive())
+    if(m_logic->judge(true))
     {
-        m_aiTimer->stop();
+        ui->btnOk->setEnabled(false);
+        ui->btnNg->setEnabled(false);
     }
-
-    if(m_curNgImgIndex < 0)
-    {
-        QMessageBox::information(this, QStringLiteral("提示"), QStringLiteral("请选择要判断的图片"),QMessageBox::Ok);
-        m_isFinished = true;
-        return;
-    }
-
-//    if(m_timerMap.value(m_handle))
-//    {
-//        if(m_timerMap.value(m_handle)->isStart())
-//        {
-//            m_timerMap.value(m_handle)->stopTimer();
-//        }
-//    }
-
-    m_isFinished = false;
-
-    ui->btnOk->setEnabled(false);
-    ui->btnNg->setEnabled(false);
-
-    QJsonDocument jdoc;
-    QJsonObject jobj;
-    jobj.insert("defect", "");
-    jobj.insert("pos", "");
-
-    jdoc.setObject(jobj);
-    QByteArray res = jdoc.toJson();
-
-    if(m_socketMap.contains(m_handle))
-    {
-        if(m_modelIndex == 0)
-        {
-            m_socketMap.value(m_handle)->write(res);
-        }
-    }
-
-    int column = m_curNgImgIndex;
-    QString level = m_ngLevelList.at(m_curNgImgIndex);
-    m_positionLists.removeAt(m_curNgImgIndex);
-    m_classLists.removeAt(m_curNgImgIndex);
-    m_ngLevelList.removeAt(m_curNgImgIndex);
-
-    QString imgName = m_curImgPath.split("/").last();
-    qDebug()<<m_handle<<imgName<<" On BtnOK : "<<QString(res);
-
-    ClientParam param = m_paramMap.value(m_handle);
-    Saver *saver = new Saver(param, m_curImg, m_db, m_db2, m_savePath, m_savePath2, imgName, true, "");
-    saver->setParam(m_excelSaver, m_wkshop, level);
-    connect(saver,SIGNAL(finished()),saver,SLOT(deleteLater()));
-    saver->start();
-
-    updateImgWidget(column);
-
-    m_isFinished = true;
-    showNextImage();
 }
 
 void MainWindow::on_btnNg_clicked()
 {
-    if(m_aiTimer->isActive())
+    if(m_logic->judge(false))
     {
-        m_aiTimer->stop();
+        ui->btnOk->setEnabled(false);
+        ui->btnNg->setEnabled(false);
     }
+}
 
-    if(m_curNgImgIndex < 0)
-    {
-        QMessageBox::information(this, QStringLiteral("提示"), QStringLiteral("请选择要判断的图片"),QMessageBox::Ok);
-        m_isFinished = true;
-        return;
-    }
-
-//    if(m_timerMap.value(m_handle))
-//    {
-//        if(m_timerMap.value(m_handle)->isStart())
-//        {
-//            m_timerMap.value(m_handle)->stopTimer();
-//        }
-//    }
-
-    QString equip = m_paramMap.value(m_handle).info;
-    SortMap sortMap = m_sortMap.value(equip);
-    QMap<QString, QStringList> tmpMap;
-    if(sortMap.keys().length() != 0)
-    {
-        QString key = sortMap.keys().at(0);
-        tmpMap = sortMap.value(key);
-    }
-
-    int horPic = m_imgParamMap.value(equip).at(1);
-    int verPic = m_imgParamMap.value(equip).at(2);
-    bool isTurn = false;
-    if(m_imgParamMap.value(equip).length() > 0 && m_imgParamMap.value(equip).at(0))
-    {
-        isTurn = true;
-    }
-
-    QStringList posList;
-    QStringList defList;
-    if(m_modelIndex == 0)
-    {
-        NgDialog *ngDlg = new NgDialog(isTurn, horPic, verPic, m_mesDefList);
-        if(ngDlg->exec() == QDialog::Accepted)
-        {
-            posList = ngDlg->getPosList();
-            defList = ngDlg->getDefList();
-
-            delete ngDlg;
-        }
-        else
-        {
-            bool isOk = ngDlg->getIsOk();
-            if(!isOk)
-            {
-                delete ngDlg;
-                return;
-            }
-        }
-    }
-
-    m_isFinished = false;
-
-    ui->btnOk->setEnabled(false);
-    ui->btnNg->setEnabled(false);
-
-    QJsonDocument jdoc;
-    QJsonObject jobj;
-
-    QString strDef = stringListToString(defList);
-    QString strPos = stringListToString(posList);
-
-    jobj.insert("defect", strDef);
-    jobj.insert("pos", strPos);
-
-    jdoc.setObject(jobj);
-    QByteArray res = jdoc.toJson();
-
-    if(m_socketMap.contains(m_handle))
-    {
-        if(m_modelIndex == 0)
-        {
-            m_socketMap.value(m_handle)->write(res);
-        }
-    }
-
-    QString level = m_ngLevelList.at(m_curNgImgIndex);
-    m_positionLists.removeAt(m_curNgImgIndex);
-    m_classLists.removeAt(m_curNgImgIndex);
-    m_ngLevelList.removeAt(m_curNgImgIndex);
-
-    int column = m_curNgImgIndex;
-    QString imgName = m_curImgPath.split("/").last();
-    qDebug()<<m_handle<<imgName<<" On BtnNG : "<<QString(res);
-
-    if(!defList.contains(QStringLiteral("重拍")))
-    {
-        ClientParam param = m_paramMap.value(m_handle);
-        Saver *saver = new Saver(param, m_curImg, m_db, m_db2, m_savePath, m_savePath2, imgName, false, strDef);
-        saver->setParam(m_excelSaver, m_wkshop, level);
-        connect(saver,SIGNAL(finished()),saver,SLOT(deleteLater()));
-        saver->start();
-    }
-
-    updateImgWidget(column);
-
-    m_isFinished = true;
-    showNextImage();
+void MainWindow::setBtnsEnabled(bool value)
+{
+    ui->btnOk->setEnabled(value);
+    ui->btnNg->setEnabled(value);
 }
 
 QString MainWindow::stringListToString(QStringList list)
@@ -1161,6 +869,22 @@ void MainWindow::updateImgWidget(int column)
     {
         m_aiTimer->start(m_delaySecs * 1000);
     }
+}
+
+void MainWindow::removeImageForm(ImgForm *form)
+{
+    ui->horizontalLayout->removeWidget(form);
+}
+
+void MainWindow::appendText(const QString &text)
+{
+    ui->textEdit->append(text);
+}
+
+void MainWindow::updateAiDisconnected(const QString &url)
+{
+    ui->cmbBox_aiStatus->addItem(url);
+    ui->btnUpdate->setEnabled(true);
 }
 
 void MainWindow::on_btnQuery_clicked()
@@ -1472,6 +1196,8 @@ void MainWindow::slot_applySorting(QString equip, QStringList verHeader, QString
 
 void MainWindow::updateDB2Sort(const QString &product, const QString &sortText, QMap<QString,QStringList> &defMap)
 {
+    if(m_db2.isOpen()==false) return;
+
     QSqlQuery query(m_db2);
     QString sql;
     sql = QString("delete from tab_sort where product = '%1' and sort = '%2'").arg(product).arg(sortText);
@@ -1542,6 +1268,8 @@ void MainWindow::slot_addSorting(const QString &equip, const QStringList &sortLi
 
 void MainWindow::updateDB2Recipe(const QString &product, const QString &sort)
 {
+    if(m_db2.isOpen()==false) return;
+
     QSqlQuery query(m_db2);
     QMap<QString,QList<double>>::iterator it;
     QString sql;
@@ -1647,60 +1375,6 @@ void MainWindow::slot_modifySorting(const QString &equip, const QString &node, c
     updateDB2Recipe(product, strSort);
 }
 
-void MainWindow::on_btnTest_clicked()
-{
-    if(ui->btnTest->isChecked())
-    {
-        m_testNum = 0;
-        m_imgFormList.clear();
-        m_testAiList.clear();
-        m_testAiList.append("http://192.168.10.96:9001");
-        m_testAiList.append("http://192.168.10.96:9002");
-        m_testAiList.append("http://192.168.10.96:9003");
-        m_testAiList.append("http://192.168.10.96:9004");
-        m_testAiList.append("http://192.168.10.96:9005");
-        m_testAiList.append("http://192.168.10.96:9006");
-        m_testAiList.append("http://192.168.10.96:9007");
-        m_testAiList.append("http://192.168.10.96:9008");
-
-        m_imgNameList.clear();
-        m_imgNameList.append("F:/fuck/fuck_1.jpg");
-        m_imgNameList.append("F:/fuck/fuck_2.jpg");
-        m_imgNameList.append("F:/fuck/fuck_3.jpg");
-        m_imgNameList.append("F:/fuck/fuck_4.png");
-        m_imgNameList.append("F:/fuck/fuck_5.jpg");
-        m_imgNameList.append("F:/fuck/fuck_6.jpg");
-        m_imgNameList.append("F:/fuck/fuck_7.jpg");
-        m_imgNameList.append("F:/fuck/fuck_8.jpg");
-        m_imgNameList.append("F:/fuck/fuck_9.jpg");
-
-        m_testTimer->start(3000);
-        ui->btnTest->setIcon(QIcon(":/images/images/stop.ico"));
-    }
-    else
-    {
-        if(m_testTimer->isActive())
-        {
-            m_testTimer->stop();
-        }
-
-        ui->btnTest->setIcon(QIcon(":/images/images/start.ico"));
-    }
-}
-
-void MainWindow::slot_testTimeout()
-{
-    QImage image;
-    if(m_testNum == 8)
-        m_testNum = 0;
-    QString ip = m_testAiList.at(m_testNum);
-
-    QString imgName = "F:/fuck/fuck_4.png";
-    image.load(imgName);
-    if(image.isNull())
-        return;
-}
-
 void MainWindow::sendNextImageToAi()
 {
     QMutex mutex;
@@ -1716,7 +1390,9 @@ void MainWindow::sendNextImageToAi()
         QMap<QString,int>::iterator it = tmpMap.begin();
         QString imgName = it.key();
         int handle = it.value();
-        m_statusMap.insert(url, true);
+        AiStatus status;
+        status.isBusy = false;
+        m_statusMap.insert(url, status);
         sendImageToAi(imgName, url, handle);
         qDebug()<<handle<<" sendImageToAi "<<url;
         m_unSendImgList.removeAt(0);
@@ -1725,7 +1401,7 @@ void MainWindow::sendNextImageToAi()
     mutex.unlock();
 }
 
-void MainWindow::slot_aiResult(bool isOk, QString url, QString level, QString imgPath, int handle, QImage img, QStringList defList, QStringList posList,
+void MainWindow::slot_aiResult(bool isOk, bool bTimeout, QString url, QString level, QString imgPath, int handle, QImage img, QStringList defList, QStringList posList,
                                QStringList clsList, AiDataMap areaMap, AiDataMap lenMap, QMap<QString,QStringList> posMap)
 {
     //添加线程锁
@@ -1740,6 +1416,15 @@ void MainWindow::slot_aiResult(bool isOk, QString url, QString level, QString im
         mutex.lock();
         QSound * sound = new QSound(":/sound/Audio.wav");
         sound->play();
+        if(!bTimeout)
+        {
+            AiStatus status = m_statusMap.value(url);
+            status.bTimeout = false;
+            status.isBusy = false;
+            status.timeoutNum = 0;
+
+            m_statusMap.insert(url, status);
+        }
         m_defList = defList;
         m_posList = posList;
         m_clsList = clsList;
@@ -1881,7 +1566,9 @@ void MainWindow::slot_sortResult(int handle, bool isOk, QString level)
 
 void MainWindow::slot_sort_info(bool res, QString info, QString level, int handle, QString url)
 {
-    m_statusMap.insert(url, false);
+    AiStatus status;
+    status.isBusy = false;
+    m_statusMap.insert(url, status);
     qDebug()<<handle<<" "<<url<<" set free";
     if(m_sortNum == 100)
     {
@@ -1938,7 +1625,20 @@ void MainWindow::on_btnPic_clicked()
 void MainWindow::slot_aiDisconnect(QString url, int handle)
 {
     qDebug()<<handle<<url<<" slot_aiDisconnect";
-    m_statusMap.insert(url, false);
+    AiStatus status = m_statusMap.value(url);
+    if(status.bTimeout)
+    {
+        status.timeoutNum++;
+    }
+
+    if(status.timeoutNum < AI_TIMEOUT_COUNT)
+    {
+        status.isBusy = false;
+        ui->cmbBox_aiStatus->addItem(url);
+        ui->btnUpdate->setEnabled(true);
+    }
+
+    m_statusMap.insert(url, status);
     QString strDev = m_paramMap.value(handle).info;
     QString info = strDev + " " + url + QStringLiteral(": AI处理图像超时，人工判定");
     ui->textEdit->append(QString("<font color=\"#ff0000\">%1</font>").arg(info));
@@ -1967,6 +1667,7 @@ void MainWindow::on_btnSettings_clicked()
     dlg->setDgList(m_dgList);
     dlg->setWkshop(m_wkshop);
     dlg->setImgModel(m_imgModel);
+    dlg->setNgDlgModel(m_ngDlgModel);
 
     if(dlg->exec() == QDialog::Accepted)
     {
@@ -1982,6 +1683,7 @@ void MainWindow::on_btnSettings_clicked()
         m_dgList = dlg->getDgList();
         m_wkshop = dlg->getWkshop();
         m_imgModel = dlg->getImgModel();
+        m_ngDlgModel = dlg->getNgDlgModel();
         clsSettings *settings = new clsSettings("./cfg/Settings.ini");
         QString strNode;
         strNode = QString("System/");
@@ -2000,6 +1702,7 @@ void MainWindow::on_btnSettings_clicked()
         settings->writeSetting(strNode + "dgList", m_dgList);
         settings->writeSetting(strNode + "wkshop", m_wkshop);
         settings->writeSetting(strNode + "imgModel", m_imgModel);
+        settings->writeSetting(strNode + "ngDlgModel", m_ngDlgModel);
 
         strNode = QString("Database/");
         settings->writeSetting(strNode + "dbIp", m_dbParam.ip);
@@ -2074,7 +1777,7 @@ void MainWindow::on_btnAiUrlSet_clicked()
         clsSettings *settings = new clsSettings("./cfg/Settings.ini");
         QString strNode = QString("AiUrl/");
 
-        QMap<QString,bool> tmpMap = m_statusMap;
+        QMap<QString,AiStatus> tmpMap = m_statusMap;
         m_statusMap.clear();
         int portNum = 0;
 
@@ -2084,14 +1787,16 @@ void MainWindow::on_btnAiUrlSet_clicked()
             QString strUrl = portList.at(i);
             if(!tmpMap.contains(strUrl))
             {
-                m_statusMap.insert(strUrl, false);
+                AiStatus status;
+                status.isBusy = false;
+                m_statusMap.insert(strUrl, status);
                 QString key = QString("url_%1").arg(QString::number(portNum));
                 settings->writeSetting(strNode + key, strUrl);
             }
             else
             {
-                bool value = tmpMap.value(strUrl);
-                m_statusMap.insert(strUrl, value);
+                AiStatus status = tmpMap.value(strUrl);
+                m_statusMap.insert(strUrl, status);
             }
         }
         settings->writeSetting(strNode + "urlNum", portNum);
@@ -2230,5 +1935,101 @@ void MainWindow::slot_heartTimeout(int handle)
     {
         m_socketMap.value(handle)->write("heart");
         qDebug()<<handle<<m_paramMap.value(handle).info<<"send heart";
+    }
+}
+
+/*
+void MainWindow::insertPathEx(QSqlDatabase &db, const QString barCode, const QString code, const QString sharePath)
+{
+    if(!db.isOpen())
+    {
+        qDebug()<<"MainWindow::insertPathEx: db not open";
+        return;
+    }
+
+    if (db.transaction())
+    {
+        //QString repSql = QString("insert into tab_repairex (barcode,code,path,flag) values('%1','%2','%3',0)").arg(barCode).arg(code).arg(sharePath);
+        QString repSql = QString("insert into tab_repairex values('%1','%2','%3',0)").arg(barCode).arg(code).arg(sharePath);
+        qDebug() << "MainWindow::insertPathEx === sql:" << repSql;
+
+        QSqlQuery queryRep(db);
+        queryRep.prepare(repSql);
+        queryRep.exec(repSql);
+        if (!db.commit())
+        {
+            qDebug() << "MainWindow::insertPathEx === commit fail. err type:" << db.lastError().type() << " text:" << db.lastError().text();
+            if (!db.rollback())
+            {
+                qDebug() << "MainWindow::insertPathEx === commit fail. rollback fail. err type:" << db.lastError().type() << " text:" << db.lastError().text();
+
+                return;
+            }
+            else
+            {
+                qDebug() << "MainWindow::insertPathEx === commit fail. rollback ok.";
+
+                return;
+            }
+        }
+        else
+        {
+            qDebug() << "MainWindow::insertPathEx === commit ok.";
+            //queryRep.clear();
+
+            return;
+        }
+    }
+    else
+    {
+        qDebug() << "MainWindow::insertPathEx === begin transaction fail. err type:" << db.lastError().type() << " text:" << db.lastError().text();
+    }
+}*/
+
+void MainWindow::insertPathEx(QSqlDatabase &db, const QString barCode, const QString code, const QString sharePath)
+{
+    if(!db.isOpen())
+    {
+        qDebug()<<"MainWindow::insertPathEx: db not open";
+        return;
+    }
+
+    //QString repSql = QString("insert into tab_repairex (barcode,code,path,flag) values('%1','%2','%3',0)").arg(barCode).arg(code).arg(sharePath);
+    QString repSql = QString("insert into tab_repairex values('%1','%2','%3',0)").arg(barCode).arg(code).arg(sharePath);
+    qDebug() << "MainWindow::insertPathEx === sql:" << repSql;
+
+    QSqlQuery queryRep(db);
+    bool bret = queryRep.exec(repSql);
+    if (bret == false)
+    {
+        qDebug() << "MainWindow::insertPathEx === db.exec fail. err type:" << db.lastError().type() << " text:" << db.lastError().text();
+        return;
+    }
+
+    qDebug() << "MainWindow::insertPathEx === db.exec succ.";
+    queryRep.clear();
+}
+
+void MainWindow::on_btnUpdate_clicked()
+{
+    QString url = ui->cmbBox_aiStatus->currentText();
+    if(url.isEmpty())
+    {
+        return;
+    }
+
+    AiStatus status = m_statusMap.value(url);
+    status.bTimeout = false;
+    status.isBusy = false;
+    status.timeoutNum = 0;
+
+    m_statusMap.insert(url, status);
+
+    int index = ui->cmbBox_aiStatus->currentIndex();
+    ui->cmbBox_aiStatus->removeItem(index);
+
+    if(ui->cmbBox_aiStatus->currentText().isEmpty())
+    {
+        ui->btnUpdate->setEnabled(false);
     }
 }

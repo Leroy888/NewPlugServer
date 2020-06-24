@@ -411,8 +411,15 @@ void SortThread::saveImage()
 
 void SortThread::insertResult(const QString &sql, const QString &sql2)
 {
+    if(!m_db.isOpen())
+    {
+        qDebug()<<"SortThread::insertResult: m_db not open";
+        return;
+    }
     QSqlQuery query(m_db);
     query.exec(sql);
+
+    if(m_db2.isOpen()==false) return;
 
     QSqlQuery query2(m_db2);
     query2.exec(sql2);

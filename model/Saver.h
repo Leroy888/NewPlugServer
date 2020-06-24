@@ -15,11 +15,17 @@ public:
           const QString &path, const QString &path2, const QString &imgName, const bool isOk, const QString &defect);
 
     void setParam(ExcelSaver *saver, const QString &wkshop, const QString &level);
+    void setInfoParam(const QString &date, const QString &info, const QString &dute, const QString &res, const QString &line);
     void run();
 
 private:
     void saveImage(const QString &imgName);
     void insertData(const QString &sql, const QString &sql2);
+    void insertData2(QSqlDatabase &db,const QString &sql, const QString &sql2);
+    void insertDataEx(const QString &sql, const QString sharePath, const QString &sql2);
+    void insertPath(const QString barCode, const QString code, const QString sharePath);
+    void insertPathEx(QSqlDatabase &db,const QString barCode, const QString code, const QString sharePath);
+    void insertBinData();
 
 private:
     ClientParam m_param;
@@ -34,6 +40,13 @@ private:
     ExcelSaver *m_excelSaver;
     QString m_wkshop;
     QString m_level;
+    QString m_sharePath;
+
+    QString m_date;
+    QString m_info;
+    QString m_dute;
+    QString m_res;
+    QString m_line;
 };
 
 #endif // SAVER_H
