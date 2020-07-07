@@ -113,6 +113,24 @@ void Logic::readSettings()
         QString product;
         settings->readSetting(strNode + QString("product_%1").arg(QString::number(i)), product);
         m_equipProductMap.insert(strDev, product);
+
+        int horNum = imgParamList.at(1);
+        QImage *image;
+        if(horNum == 20)
+        {
+            image = new QImage(5750, 3550, QImage::Format_Grayscale8);
+
+        }
+        else if(horNum == 24)
+        {
+            image = new QImage(6900, 3550, QImage::Format_Grayscale8);
+        }
+        else if(horNum == 26)
+        {
+            image = new QImage(7475, 3550, QImage::Format_Grayscale8);
+        }
+
+        m_imgMap.insert(strDev, image);
     }
 
     strNode = QString("MesDef/");
@@ -238,7 +256,8 @@ void Logic::sendNextImageToAi()
         AiStatus status;
         status.isBusy = false;
         m_statusMap.insert(url, status);
-        sendImageToAi(imgName, url, handle);
+        int index = m_imgIndexMap.value(imgName);
+        sendImageToAi(imgName, url, handle, index);
         qDebug()<<handle<<" sendImageToAi "<<url;
         m_unSendImgList.removeAt(0);
     }
@@ -379,7 +398,7 @@ void Logic::slot_sortResult(int handle, bool isOk, QString level)
         m_socketMap.value(handle)->write(cmd);
     }
 
-    m_window->
+  //  m_window->
 }
 
 void Logic::parseData(const int handle, ClientParam &param, const QMap<QString, QString> &lineMap, const QByteArray &data)
@@ -429,11 +448,13 @@ void Logic::parseData(const int handle, ClientParam &param, const QMap<QString, 
     if(!m_equipStatusMap.contains(info))
     {
         m_equipStatusMap.insert(info, true);
-        emit sig_updateTb_client(info, handle, true);
+        m_window->update_Tb_client(info, handle, true);
+      //  emit sig_updateTb_client(info, handle, true);
     }
     if(!m_equipSortMap.contains(info))
     {
-          emit sig_clientSwitch(handle, info, true);
+         // emit sig_clientSwitch(handle, info, true);
+        m_window->update_Tb_client(info, handle, true);
     }
 
     //场景2：客户端通知一人多机保存NG到返修表
@@ -466,7 +487,18 @@ void Logic::parseData(const int handle, ClientParam &param, const QMap<QString, 
     QString url = getUrl();
     if(url != "")
     {
-        sendImageToAi(imgName, url, handle);
+        QString tmpImgName = imgName.split("_").at(0);
+        int index = 0;
+        if(!m_imgIndexMap.contains(tmpImgName))
+        {
+            m_imgIndexMap.insert(tmpImgName, 0);
+        }
+        else
+        {
+            index = m_imgIndexMap.value(tmpImgName) + 1;
+            m_imgIndexMap.insert(tmpImgName, index);
+        }
+        sendImageToAi(imgName, url, handle, index);
         qDebug()<<"send image to ai, handle = "<<handle<<" -> "<<info;
     }
     else
@@ -714,7 +746,7 @@ void Logic::updateImgWidget(int column)
     }
 }
 
-void Logic::sendImageToAi(QString &imgPath, QString &url, int handle)
+void Logic::sendImageToAi(QString &imgPath, QString &url, int handle, int index)
 {
     QString equip = m_paramMap.value(handle).info;
     SortMap sortMap = m_sortMap.value(equip);
@@ -735,7 +767,7 @@ void Logic::sendImageToAi(QString &imgPath, QString &url, int handle)
     ClientParam param = m_paramMap.value(handle);
     QStringList sortList = m_equipSortMap.value(equip);
 
-    AiThread *thd = new AiThread(imgPath, url, m_horPieces, m_verPieces, handle);
+    AiThread *thd = new AiThread(imgPath, url, m_horPieces, m_verPieces, handle, index);
     thd->setAiModel(m_defMap, m_clsMap);
     //thd->setPixels(m_topPixel, m_bottomPixel, m_leftPixel, m_rightPixel);
     thd->setParams(sortMap, m_db, m_db2, m_wkshop, sortList, param, m_savePath, code, m_dgList);

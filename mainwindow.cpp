@@ -93,8 +93,9 @@ void MainWindow::sendImageToAi(QString &imgPath, QString &url, int handle)
     code = code.remove(len - 4, 4);
     ClientParam param = m_paramMap.value(handle);
     QStringList sortList = m_equipSortMap.value(equip);
+    int index = 0;
 
-    AiThread *thd = new AiThread(imgPath, url, m_horPieces, m_verPieces, handle);
+    AiThread *thd = new AiThread(imgPath, url, m_horPieces, m_verPieces, handle, index);
     thd->setAiModel(m_defMap, m_clsMap);
     //thd->setPixels(m_topPixel, m_bottomPixel, m_leftPixel, m_rightPixel);
     thd->setParams(sortMap, m_db, m_db2, m_wkshop, sortList, param, m_savePath, code, m_dgList);

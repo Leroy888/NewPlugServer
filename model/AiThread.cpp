@@ -19,8 +19,8 @@
 #include <QDebug>
 
 
-AiThread::AiThread(QString &imgPath, QString strUrl, int horNum, int verNum, int handle/*, ImgParam &param*/)
-    :m_imgPath(imgPath),m_strUrl(strUrl),m_horNum(horNum),m_verNum(verNum),m_handle(handle)/*, m_imgParam(param)*/
+AiThread::AiThread(QString &imgPath, QString strUrl, int horNum, int verNum, int handle, int index)
+    :m_imgPath(imgPath),m_strUrl(strUrl),m_horNum(horNum),m_verNum(verNum),m_handle(handle), m_index(index)
 {
     readAiModel("");
     m_waitTimeMs = 5000;
@@ -205,12 +205,12 @@ void AiThread::run()
 
         QString info = m_strUrl + QStringLiteral(" : AI服务器请求超时");
         qDebug()<<m_handle<<info;
-        QString imgName = m_imgPath.split("/").last();
+
         emit sig_aiDisConnect(m_strUrl, m_handle);
         emit sig_aiResult(false, true, m_strUrl, "", m_imgPath, m_handle, m_img, m_defectList, m_posList, m_clsList, m_areaMap, m_lenMap, m_posMap);
 
-        QString pcInfo = m_param.info;
-        Functions::saveImage(m_img, m_savePath, imgName, pcInfo, QStringLiteral("超时/"));
+     //   QString pcInfo = m_param.info;
+      //  Functions::saveImage(m_img, m_savePath, imgName, pcInfo, QStringLiteral("超时/"));
     }
     reply->close();
     reply->deleteLater();

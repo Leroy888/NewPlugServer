@@ -9,6 +9,7 @@
 #include <QString>
 #include <QHash>
 #include <QMap>
+#include "view/LoginDialog.h"
 
 #include <QDebug>
 
@@ -44,7 +45,7 @@ int main(int argc, char *argv[])
 {
     //自动适应分辨率
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    qInstallMessageHandler(loggerOutput);
+    //  qInstallMessageHandler(loggerOutput);
 
     QApplication a(argc, argv);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));

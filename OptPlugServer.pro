@@ -50,6 +50,7 @@ SOURCES += \
     model/ExcelSaver.cpp \
     model/Saver.cpp \
     view/ImageViewer.cpp \
+    view/LoginDialog.cpp \
     view/StandardDlg.cpp \
     view/AiPortDialog.cpp \
     view/ImageSetDialog.cpp \
@@ -87,6 +88,7 @@ HEADERS += \
     model/ExcelSaver.h \
     model/Saver.h \
     view/ImageViewer.h \
+    view/LoginDialog.h \
     view/StandardDlg.h \
     view/AiPortDialog.h \
     view/ImageSetDialog.h \
@@ -113,6 +115,7 @@ FORMS += \
     ComboBox.ui \
     PointForm.ui \
     view/ImageViewer.ui \
+    view/LoginDialog.ui \
     view/StandardDlg.ui \
     view/AiPortDialog.ui \
     view/ImageSetDialog.ui \

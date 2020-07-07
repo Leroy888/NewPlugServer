@@ -171,6 +171,8 @@ protected:
     bool m_isInit;
     QMap<QString,QString> m_equipProductMap;    //每个设备对应的产品批次Map
     QMap<QString,QString> m_equipLineMap;   //设备对应的线别
+    QMap<QString,int> m_imgIndexMap;
+    QMap<QString,QImage*> m_imgMap;
 
     ExcelSaver *m_excelSaver;
   //  QTimer *m_heartTimer;
@@ -178,7 +180,7 @@ protected:
     QString m_shareIP;
     QString m_shareFolderName;
 
-    void sendImageToAi(QString &imgPath, QString &url, int handle);
+    void sendImageToAi(QString &imgPath, QString &url, int handle, int index);
     void sendNextImageToAi();
     void showNextImage();
     void updateImgWidget(int column);

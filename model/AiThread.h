@@ -17,7 +17,7 @@ class AiThread : public QThread
 {
     Q_OBJECT
 public:
-    AiThread(QString &imgPath, QString strUrl, int horNum, int verNum, int handle);
+    AiThread(QString &imgPath, QString strUrl, int horNum, int verNum, int handle, int index);
     ~AiThread();
 
 public:
@@ -62,6 +62,7 @@ protected:
     AiPoint getAiPoint(const AiResult &aiRes, int widPic, int heightPic);
 private:
   //  static AiThread *m_aiThd;
+    int m_index;
     QString m_iniFile;
     QImage m_img;
     QString m_imgPath;
