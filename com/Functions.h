@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QImage>
+#include <QMap>
+#include <QStringList>
+#include <QList>
 
 struct SaveData
 {
@@ -78,6 +81,24 @@ struct ImgParam
     int leftPixel;
     int rightPixel;
 };
+
+class OptDefects
+{
+public:
+    OptDefects() {}
+
+    void clear();
+
+    AiDataMap areaMap;      //单片电池片上某一缺陷对应的长度列表
+    AiDataMap lenMap;    //单个带电池片缺陷对应的长度列表
+    AiDataMap dgMap;      //灰度值
+    AiPointMap pointMap;  //坐标
+    QMap<QString,QStringList> posMap; //缺陷所在位置 A1、A2等
+    QMap<QString,int> piecNumMap;     //电池片上某一缺陷的总数
+    QMap<QString,int> numMap;         //组件上某一缺陷的总数
+    QMap<QString,int> ngNumMap;       //一个组件对应的缺陷损坏的电池片数
+};
+
 
 
 class Functions

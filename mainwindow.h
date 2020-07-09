@@ -147,6 +147,8 @@ private:
 
     Logic* m_logic;
 
+    QMap<QString,OptDefects*> m_optDeftsMap;
+
     int m_row;
     int m_column;
     QMap<QString,ClientForm*> m_clientMap;

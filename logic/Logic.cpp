@@ -125,12 +125,16 @@ void Logic::readSettings()
         {
             image = new QImage(6900, 3550, QImage::Format_Grayscale8);
         }
-        else if(horNum == 26)
+        else /*if(horNum == 26)*/
         {
             image = new QImage(7475, 3550, QImage::Format_Grayscale8);
         }
+        image->fill(Qt::black);
 
         m_imgMap.insert(strDev, image);
+
+        OptDefects *optDefect = new OptDefects;
+        m_optDeftsMap.insert(strDev, optDefect);
     }
 
     strNode = QString("MesDef/");
@@ -767,7 +771,8 @@ void Logic::sendImageToAi(QString &imgPath, QString &url, int handle, int index)
     ClientParam param = m_paramMap.value(handle);
     QStringList sortList = m_equipSortMap.value(equip);
 
-    AiThread *thd = new AiThread(imgPath, url, m_horPieces, m_verPieces, handle, index);
+    QImage* image = m_imgMap.value(equip);
+    AiThread *thd = new AiThread(imgPath, image,  url, m_optDeftsMap.value(equip), m_horPieces, m_verPieces, handle, index);
     thd->setAiModel(m_defMap, m_clsMap);
     //thd->setPixels(m_topPixel, m_bottomPixel, m_leftPixel, m_rightPixel);
     thd->setParams(sortMap, m_db, m_db2, m_wkshop, sortList, param, m_savePath, code, m_dgList);

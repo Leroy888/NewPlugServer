@@ -75,49 +75,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::sendImageToAi(QString &imgPath, QString &url, int handle)
 {
-    QString equip = m_paramMap.value(handle).info;
-    SortMap sortMap = m_sortMap.value(equip);
-    QList<double> list = m_imgParamMap.value(equip);
-    if(list.length() < 5)
-    {
-        AiStatus status;
-        m_statusMap.insert(url, status);
-        QMessageBox::information(this,QStringLiteral("提示"), QStringLiteral("图像设置里没有找到相应的设备号:\n") + equip, QMessageBox::Ok);
-        return;
-    }
 
-    QDateTime dateTime = QDateTime::currentDateTime();
-    QString code = dateTime.toString("yyyyMMddhhmmss");
-    code = m_curImgPath.split("/").last();
-    int len = code.length();
-    code = code.remove(len - 4, 4);
-    ClientParam param = m_paramMap.value(handle);
-    QStringList sortList = m_equipSortMap.value(equip);
-    int index = 0;
-
-    AiThread *thd = new AiThread(imgPath, url, m_horPieces, m_verPieces, handle, index);
-    thd->setAiModel(m_defMap, m_clsMap);
-    //thd->setPixels(m_topPixel, m_bottomPixel, m_leftPixel, m_rightPixel);
-    thd->setParams(sortMap, m_db, m_db2, m_wkshop, sortList, param, m_savePath, code, m_dgList);
-
-    int horPic = list.at(1);
-    int verPic = list.at(2);
-    int topPix = list.at(3);
-    int btmPix = list.at(4);
-    int leftPix = list.at(5);
-    int rightPix = list.at(6);
-
-    thd->setImageParam(horPic, verPic, topPix, btmPix, leftPix, rightPix, m_imgModel);
-
-    qRegisterMetaType<AiDataMap>("AiDataMap");
-    qRegisterMetaType<QMap<QString,QStringList> >("AiPosMap");
-    connect(thd,SIGNAL(sig_aiResult(bool,bool,QString,QString,QString,int,QImage,QStringList,QStringList,QStringList,AiDataMap,AiDataMap,QMap<QString,QStringList>)),
-            this,SLOT(slot_aiResult(bool,bool,QString,QString,QString,int,QImage,QStringList,QStringList,QStringList,AiDataMap,AiDataMap,QMap<QString,QStringList>)));
-    connect(thd,SIGNAL(sig_aiDisConnect(QString,int)),this,SLOT(slot_aiDisconnect(QString,int)));
-    connect(thd,SIGNAL(sig_sortResult(int,bool,QString)),this,SLOT(slot_sortResult(int,bool,QString)));
-    connect(thd,SIGNAL(sig_sort_info(bool,QString,QString,int,QString)),this,SLOT(slot_sort_info(bool,QString,QString,int,QString)));
-    connect(thd,SIGNAL(finished()),thd,SLOT(deleteLater()));
-    thd->start();
 }
 
 void MainWindow::semdImageToAi(QString &imgPath, QString &url, int handle, SortThread &sortThd)

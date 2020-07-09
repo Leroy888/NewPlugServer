@@ -77,3 +77,15 @@ void Functions::saveImage(const QImage &img, const QString &savePath, const QStr
     img.save((path + imgName));
 }
 
+
+void OptDefects::clear()
+{
+    areaMap.clear();      //单片电池片上某一缺陷对应的长度列表
+    lenMap.clear();    //单个带电池片缺陷对应的长度列表
+    dgMap.clear();      //灰度值
+    pointMap.clear();  //坐标
+    posMap.clear(); //缺陷所在位置 A1、A2等
+    piecNumMap.clear();     //电池片上某一缺陷的总数
+    numMap.clear();         //组件上某一缺陷的总数
+    ngNumMap.clear();       //一个组件对应的缺陷损坏的电池片数
+}

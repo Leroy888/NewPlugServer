@@ -73,6 +73,8 @@ protected:
     QMap<QString,ClientForm*> m_clientMap;
     QMap<int,QTcpSocket*> m_socketMap;
 
+    QMap<QString,OptDefects*> m_optDeftsMap;
+
   //  QMap<int,HeartTimer*> m_timerMap;
     int m_handle;
     float m_fScale;

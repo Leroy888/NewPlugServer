@@ -19,8 +19,9 @@
 #include <QDebug>
 
 
-AiThread::AiThread(QString &imgPath, QString strUrl, int horNum, int verNum, int handle, int index)
-    :m_imgPath(imgPath),m_strUrl(strUrl),m_horNum(horNum),m_verNum(verNum),m_handle(handle), m_index(index)
+AiThread::AiThread(QString &imgPath, QImage *image, QString strUrl, OptDefects *optDef, int horNum, int verNum, int handle, int index)
+    :m_imgPath(imgPath),m_fullImage(image), m_strUrl(strUrl),m_optDefects(optDef),m_horNum(horNum),m_verNum(verNum)
+    ,m_handle(handle), m_index(index)
 {
     readAiModel("");
     m_waitTimeMs = 5000;
@@ -156,20 +157,6 @@ void AiThread::run()
                 QJsonObject obj = array.at(i).toObject();
                 AiResult aiRes;
                 aiRes.clsId = obj.value("class_id").toInt();
-//                if(m_imgModel)
-//                {
-//                    aiRes.x1 = obj.value("x1").toInt() * 2;
-//                    aiRes.y1 = obj.value("y1").toInt() * 2;
-//                    aiRes.x2 = obj.value("x2").toInt() * 2;
-//                    aiRes.y2 = obj.value("y2").toInt() * 2;
-//                }
-//                else
-//                {
-//                    aiRes.x1 = obj.value("x1").toInt();
-//                    aiRes.y1 = obj.value("y1").toInt();
-//                    aiRes.x2 = obj.value("x2").toInt();
-//                    aiRes.y2 = obj.value("y2").toInt();
-//                }
                 aiRes.x1 = obj.value("x1").toInt();
                 aiRes.y1 = obj.value("y1").toInt();
                 aiRes.x2 = obj.value("x2").toInt();
@@ -277,25 +264,25 @@ void AiThread::drawImage(QList<AiResult> resList)
         QString strDef = m_Maps[aiRes.clsId];
         QString strCls = m_clsMap[strDef];  //获取改缺陷对应的大类  ： 隐裂、虚焊、其他等
 
-        QStringList posList = m_posMap.value(strCls);
+        QStringList posList = m_optDefects->posMap.value(strCls);  //m_posMap.value(strCls);
         posList.append(strPos);
-        m_posMap.insert(strCls, posList);
+        m_optDefects->posMap.insert(strCls, posList);
 
-        QList<double> dgList = m_dgMap.value(strCls);
+        QList<double> dgList = m_optDefects->dgMap.value(strCls);
         dgList.append(dbDg);
-        m_dgMap.insert(strCls, dgList);
+        m_optDefects->dgMap.insert(strCls, dgList);
 
-        QList<double> areaList = m_areaMap.value(strCls);
+        QList<double> areaList = m_optDefects->areaMap.value(strCls);
         areaList.append(area);
-        m_areaMap.insert(strCls, areaList);
+        m_optDefects->areaMap.insert(strCls, areaList);
 
-        QList<double> lenList = m_lenMap.value(strCls);
+        QList<double> lenList = m_optDefects->lenMap.value(strCls);
         lenList.append(len);
-        m_lenMap.insert(strCls, lenList);
+        m_optDefects->lenMap.insert(strCls, lenList);
 
-        QList<AiPoint> pointList = m_pointMap.value(strCls);
+        QList<AiPoint> pointList = m_optDefects->pointMap.value(strCls);
         pointList.append(point);
-        m_pointMap.insert(strCls, pointList);
+        m_optDefects->pointMap.insert(strCls, pointList);
 
         m_posList.append(strPos);
 
@@ -315,6 +302,10 @@ void AiThread::drawImage(QList<AiResult> resList)
         }
     }
     painter.end();
+
+    QPainter painter2(m_fullImage);
+    painter2.drawImage(m_img.width() * m_index, m_img.height() * m_index, m_img);
+
     qDebug()<<m_handle<<"draw image end";
     QMap<QString,int> ttMap = m_countPieceMap.value(QStringLiteral("隐裂"));
     QList<int> list = ttMap.values();
@@ -335,12 +326,13 @@ AiPoint AiThread::getAiPoint(const AiResult& aiRes, int widPic, int heightPic)
 
 void AiThread::sort()
 {
-    SortThread sortObj(m_sortMap, m_handle, m_imgPath, m_sortList, m_defectList, m_areaMap, m_lenMap, m_posMap);
+    SortThread sortObj(m_sortMap, m_handle, m_imgPath, m_sortList, m_defectList, m_optDefects->areaMap,
+                       m_optDefects->lenMap, m_optDefects->posMap);
     QImage img = m_img.copy();
     sortObj.setParams(m_db, m_db2, m_wkshop, m_param, m_savePath, img, m_code, m_isOk, m_dgList);
     sortObj.setPosList(m_posList);
     sortObj.setClsMap(m_clsMap);
-    sortObj.setMaps(m_dgMap, m_pointMap);
+    sortObj.setMaps(m_optDefects->dgMap, m_optDefects->pointMap);
     connect(&sortObj,SIGNAL(sig_sort_result(int,bool,QString)),this,SLOT(slot_sortResult(int,bool,QString)));
     connect(&sortObj,SIGNAL(sig_sort_info(bool,QString,QString)),this,SLOT(slot_sort_info(bool,QString,QString)));
 

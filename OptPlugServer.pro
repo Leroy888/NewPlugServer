@@ -66,6 +66,7 @@ SOURCES += \
 HEADERS += \
     logic/Logic.h \
         mainwindow.h \
+    model/OptTypes.h \
     tcp_server.h \
     tcp_server_private.h \
     ClientForm.h \

@@ -17,7 +17,7 @@ class AiThread : public QThread
 {
     Q_OBJECT
 public:
-    AiThread(QString &imgPath, QString strUrl, int horNum, int verNum, int handle, int index);
+    AiThread(QString &imgPath, QImage *image, QString strUrl, OptDefects *optDef, int horNum, int verNum, int handle, int index);
     ~AiThread();
 
 public:
@@ -64,7 +64,8 @@ private:
   //  static AiThread *m_aiThd;
     int m_index;
     QString m_iniFile;
-    QImage m_img;
+    QImage *m_fullImage;    //  完整的图片
+    QImage m_img;   //每串图片
     QString m_imgPath;
     QString m_strUrl;
     QString m_path; //图片保存路径
@@ -125,6 +126,8 @@ private:
     QMap<QString,int> m_piecNumMap;     //电池片上某一缺陷的总数
     QMap<QString,int> m_numMap;         //组件上某一缺陷的总数
     QMap<QString,int> m_ngNumMap;       //一个组件对应的缺陷损坏的电池片数
+
+    OptDefects *m_optDefects;
 
 };
 
